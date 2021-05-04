@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="css/w2ui-1.5.css"/>
+    <link rel="stylesheet" type="text/css" href="icons/icon-font.css" />
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script> 
+    <script type="text/javascript" src="js/w2ui-1.5.js"></script> 
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="insert_form" style="width: 550px;"></div>    
+</body>
+
+<script>
+$(function () {
+    $('#insert_form').w2form({
+        name     : 'insert_form',
+        url      : 'http://1.234.51.110:8000/insert_detail/',
+        header   : '데이터 추가',
+        fields: [
+            { field: 'DRIVER', type: 'text', required: true,
+                html: {
+                    label: '운전자',
+                    attr: 'style="width: 200px"'
+                }
+            },
+
+            { field: 'DATE', type: 'date', required: true,
+                html: {
+                    label: '날짜',
+                    attr: 'style="width: 200px"'
+                }
+            },
+
+            { field: 'START_TIME', type: 'time', required: true,
+                html: {
+                    label: ' 시작 시간 ',
+                    attr: 'style="width: 70px"',
+                    text: '@time'
+                }
+            },
+
+            { field: 'END_TIME', type: 'time', 
+                html: {
+                    anchor: '@time',
+                    label: ' 종료 시간 ',
+                    attr: 'style="width: 70px"',
+                    
+                }
+            },
+
+            { field: 'CAR_TYPE', type: 'list',  required: true,
+                html: {
+                    label: '종류',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    items: ['일반', '하이브리드']
+                }
+            },
+
+            { field: 'WEATHER', type: 'list', required: true,
+                html: {
+                    label: '날씨',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    items: ['맑음', '비', '안개', '눈', '흐림']
+                }
+            },
+
+            { field: 'DRIVEMODE', type: 'list',  required: true,
+                html: {
+                    label: '주행모드',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    items: ['시내주행', '고속하이웨이', '저속하이웨이', '험로주행', '등판주행']
+                }
+            },            
+
+            { field: 'DRIVEDISTANCE', type: 'int', required: true,
+                html: {
+                    label: '주행거리',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    min: 0,
+                    max: 200
+                }
+            },
+
+            { field: 'TEMPERATURE', type: 'int', required: true,
+                html: {
+                    label: '온도',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    format: true,
+                    precision: 2,
+                    min: -50,
+                    max: 50,
+                    step: 0.1
+                }
+            },           
+
+            { field: 'HUMIDITY', type: 'int', required: true,
+                html: {
+                    label: '습도',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    min: 0,
+                    max: 100
+                }
+            },
+
+            { field: 'PEOPLE', type: 'int', required: true,
+                html: {
+                    label: '인원수(명)',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    min: 0,
+                    max: 10
+                }
+            },
+
+            { field: 'TOTAL_WEIGHT', type: 'int', required: true,
+                html: {
+                    label: '총무게(Kg)',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    min: 0,
+                    max: 500
+                }
+            },
+
+            { field: 'AIRCONDITIONER', type: 'toggle', required: true,
+                html: {
+                    label: '에어컨'
+                }
+            },
+        ],
+        actions: {
+            Reset: function () {
+                this.clear();
+            },
+            Save: function () {
+                console.log('정보 : '+JSON.stringify(this.getCleanRecord(), null, 4))
+                // if(this.getCleanRecord().end_time==null){
+                //     alert('시간을 입력해주세요')
+                //     return false;
+                // }
+                $.ajax({
+                    url:'http://1.234.51.110:8000/insert_detail/',
+                    type:'POST',
+                    dataType:'json',
+                    contentType : 'application/x-www-form-urlencoded; charset=utf-8',
+                    data : JSON.stringify(this.getCleanRecord(), null, 4),
+                    success : function(result) {
+                        alert("추가되었습니다.");
+                        window.close();
+                        opener.document.location.reload();
+                    }
+                });
+            }
+        }
+    });
+});
+</script>
+</html>
