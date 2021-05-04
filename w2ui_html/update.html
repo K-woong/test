@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="css/w2ui-1.5.css"/>
+    <link rel="stylesheet" type="text/css" href="icons/icon-font.css" />
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script> 
+    <script type="text/javascript" src="js/w2ui-1.5.js"></script> 
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="update_form" style="width: 550px;"></div>  
+</body>
+
+<script>
+$(function () {
+    //URI 파라미터 가져오기
+    var getParameters = function (paramName) { // 리턴값을 위한 변수 선언 
+        var returnValue; // 현재 URL 가져오기 
+        var url = location.href;
+        // get 파라미터 값을 가져올 수 있는 ? 를 기점으로 slice 한 후 split 으로 나눔 
+        var parameters = (url.slice(url.indexOf('?') + 1, url.length)).split('&'); 
+
+
+        for (var i = 0; i < parameters.length; i++) { 
+            var varName = parameters[i].split('=')[0]; 
+            if (varName.toUpperCase() == paramName.toUpperCase()) { 
+                returnValue = parameters[i].split('=')[1]; 
+                return decodeURIComponent(returnValue); 
+            } 
+        } 
+    };
+
+    var driver_name = getParameters('driver_name');
+    var drive_date = getParameters('drive_date');
+    var car_type = getParameters('car_type');
+
+    var weather_value, drivemode_value;
+
+    $.ajax({
+        url: "http://1.234.51.110:8000/detail_data/?driver="+driver_name+"&date="+drive_date+"&type="+car_type,
+        type: "GET",
+        dataType:"json",                        
+        async : false,
+        success: function(json) {
+            gridjson=json[0];
+            console.log('json : '+JSON.stringify(gridjson))
+            weather_value = gridjson.WEATHER;
+            drivemode_value = gridjson.DRIVEMODE;
+            console.log('주행모드 : '+gridjson.DRIVEMODE)
+        }
+    })
+
+    $('#update_form').w2form({        
+        name     : 'update_form',
+        url      : 'server/post',
+        header   : '데이터 수정',
+        record: {
+            simple: {
+                driver: gridjson.DRIVER,
+                date : gridjson.DATE,
+                start_time : gridjson.START_TIME,
+                end_time : gridjson.END_TIME,
+                car_type : gridjson.TYPE,
+                weather : gridjson.WEATHER,                
+                people : gridjson.PEOPLE,
+                drivemode : gridjson.DRIVEMODE,
+                temperature : gridjson.TEMPERATURE,
+                humidity : gridjson.HUMIDITY,
+                total_weight : gridjson.TOTAL_WEIGHT,
+                drivedistance : gridjson.DRIVEDISTANCE,
+                image : gridjson.IMAGE
+            },
+            single: {
+                check: true,
+                airconditioner : gridjson.AIRCONDITIONER,
+            }
+        },
+        fields: [
+            { field: 'simple.driver', type: 'text', required: true,
+                html: {
+                    label: '운전자',
+                    attr: 'style="width: 200px"'
+                }
+            },
+
+            { field: 'simple.date', type: 'date', required: true,
+                html: {
+                    label: '날짜',
+                    attr: 'style="width: 200px"'
+                }
+            },
+
+            { field: 'simple.start_time', type: 'time', required: true,
+                html: {
+                    label: ' 시작 시간 ',
+                    attr: 'style="width: 70px"',
+                    text: '@time'
+                }
+            },
+
+            { field: 'simple.end_time', type: 'time',  required: true,
+                html: {
+                    anchor: '@time',
+                    label: ' 종료 시간 ',
+                    attr: 'style="width: 70px"',
+                    
+                }
+            },
+
+            { field: 'type', type: 'enum', required: true,
+                html: {
+                    label: '종류',
+                    attr: 'style="width: 200px"'
+                }
+            },
+
+            { field: 'weather', type: 'enum', required: true,
+                html: {
+                    label: '날씨',
+                    attr: 'style="width: 200px"'
+                }                
+            },
+
+            { field: 'drivemode', type: 'enum',  required: true,
+                html: {
+                    label: '주행모드',
+                    attr: 'style="width: 200px"'
+                }
+            },            
+
+            { field: 'simple.drivedistance', type: 'int', required: true,
+                html: {
+                    label: '주행거리',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    min: 0,
+                    max: 200
+                }
+            },
+
+            { field: 'simple.temperature', type: 'int', required: true,
+                html: {
+                    label: '온도',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    format: true,
+                    precision: 2,
+                    min: -50,
+                    max: 50,
+                    step: 0.1
+                }
+            },           
+
+            { field: 'simple.humidity', type: 'int', required: true,
+                html: {
+                    label: '습도',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    min: 0,
+                    max: 100
+                }
+            },
+
+            { field: 'simple.people', type: 'int', required: true,
+                html: {
+                    label: '인원수(명)',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    min: 0,
+                    max: 10
+                }
+            },
+
+            { field: 'simple.total_weight', type: 'int', required: true,
+                html: {
+                    label: '총무게(Kg)',
+                    attr: 'style="width: 200px"'
+                },
+                options: {
+                    arrows: true,
+                    min: 0,
+                    max: 500
+                }
+            },
+
+            // { field: 'simple.image', type: 'file', required: true,
+            //     html: {
+            //         label: '이미지',
+            //         attr : 'style="width: 200px"'
+            //     }
+            // },
+
+            { field: 'single.airconditioner', type: 'toggle', required: true,
+                html: {
+                    label: '에어컨'
+                }
+            },
+        ],
+        actions: {
+            Reset: function () {
+                this.clear();
+            },
+            Save: function () {                
+                var simple_json = this.getCleanRecord().simple;
+                var single_json = this.getCleanRecord().single;
+
+                if(simple_json.end_time==null || simple_json.start_time==null){
+                    alert('시간을 입력해주세요')
+                    return false;
+                }
+
+                var jsonData = {
+                    DRIVER : simple_json.driver,
+                    DATE : simple_json.date,
+                    START_TIME : simple_json.start_time,
+                    END_TIME : simple_json.end_time,
+                    CAR_TYPE : simple_json.car_type,
+                    WEATHER : simple_json.weather,
+                    DRIVEMODE : simple_json.drivemode,
+                    DRIVEDISTANCE : simple_json.drivedistance,
+                    TEMPERATURE : simple_json.temperature,
+                    HUMIDITY : simple_json.humidity,
+                    PEOPLE : simple_json.people,
+                    TOTAL_WEIGHT : simple_json.total_weight,
+                    AIRCONDITIONER : single_json.airconditioner
+                }
+                console.log('jsonData : '+JSON.stringify (jsonData))
+                // if (w2ui.update_form.validate().length == 0) {
+                    $.ajax({
+                        url:'http://1.234.51.110:8000/update_detail/',
+                        type:'PUT',
+                        dataType:'json',
+                        contentType : 'application/x-www-form-urlencoded; charset=utf-8',
+                        data : JSON.stringify (jsonData),                        
+                        success : function(result) {
+                            alert("변경되었습니다.");
+                            window.close();
+                            opener.document.location.reload();
+                        }                    
+                    }); 
+               // }               
+            }            
+        }                
+    });
+
+    $('#type').w2field('enum', {
+        openOnFocus: true,
+        items : [{ id: 0, text: '일반'}, { id: 1, text: '하이브리드'}],
+        selected : { text: car_type},
+        max : 1
+    });
+
+    $('#weather').w2field('enum', {
+        openOnFocus: true,
+        items : [{ id: 0, text: '맑음'}, { id: 1, text: '비'}, { id: 2, text: '안개'}, { id: 3, text: '눈'}, { id: 4, text: '흐림'}],
+        selected : { text: weather_value},
+        max : 1
+    });
+
+    $('#drivemode').w2field('enum', {
+        openOnFocus: true,
+        items : [{ id: 0, text: '시내주행'}, { id: 1, text: '고속하이웨이'}, { id: 2, text: '저속하이웨이'}, { id: 3, text: '험로주행'}, { id: 4, text: '등판주행'}],
+        selected : { text: drivemode_value},
+        max : 1
+    });    
+});
+</script>
+</html>
